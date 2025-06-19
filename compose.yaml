@@ -1,0 +1,9 @@
+services:
+  myapp:
+    build: .
+    ports:
+      - "9090:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
