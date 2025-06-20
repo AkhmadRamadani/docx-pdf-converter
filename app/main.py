@@ -40,3 +40,24 @@ async def convert_docx_to_pdf(file: UploadFile = File(...)):
     pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
 
     return FileResponse(pdf_path, filename=pdf_filename)
+
+@app.post("/convert_unoconv")
+async def convert_unoconv_docx_to_pdf(file: UploadFile = File(...)):
+    if not file.filename.endswith(".docx"):
+        return {"error": "Only .docx files are supported"}
+
+    input_filename = f"{uuid.uuid4()}.docx"
+    input_path = os.path.join(UPLOAD_DIR, input_filename)
+    output_path = os.path.join(OUTPUT_DIR, input_filename.replace(".docx", ".pdf"))
+
+    with open(input_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    subprocess.run([
+        "unoconv",
+        "-f", "pdf",
+        "-o", output_path,
+        input_path
+    ], check=True)
+
+    return FileResponse(output_path, filename=os.path.basename(output_path))
